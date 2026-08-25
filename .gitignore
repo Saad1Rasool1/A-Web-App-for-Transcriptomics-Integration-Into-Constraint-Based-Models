@@ -1,0 +1,19 @@
+# Data — large, and DepMap/CCLE files are subject to their own terms of
+# use, so should not be committed. See README for where to obtain these
+# and how to lay out this directory.
+DATA/
+results/
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+*.egg-info/
+
+# Virtual environments
+venv*/
+.venv/
+
+# Editor/OS
+.vscode/
+.DS_Store

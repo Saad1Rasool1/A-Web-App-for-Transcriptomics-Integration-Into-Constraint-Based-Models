@@ -1,0 +1,8 @@
+cobra
+mewpy
+optlang
+pandas
+scipy
+pytest
+# scipy only needed for examples/run_gene_essentiality_validation.py
+# pytest only needed for running the test suite

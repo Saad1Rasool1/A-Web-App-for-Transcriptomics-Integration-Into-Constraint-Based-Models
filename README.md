@@ -1,28 +1,18 @@
 # Transcriptomics-to-GEM Integration Pipeline
 
-Computational backend for integrating transcriptomic data into genome-scale
-metabolic models (GEMs). This is the analytical engine behind the Streamlit
-app — everything here is called through `tools/pipeline.py`, which is the
-one file the app actually needs to import from.
+Computational backend for integrating transcriptomic data into genome-scale metabolic models (GEMs). 
+This is the analytical backend for the Streamlit app. Everything here is called through `tools/pipeline.py`
 
 ## What this does
 
 - Four integration methods: `pfba_baseline`, `continuous_meeson`, `gimme`, `imat`
 - Three models: **Human1**, **Human2**, **Recon3D**
 - Two expression data sources: **CCLE/DepMap** (cell lines) and **TCGA** (tumour samples)
-- Runs entirely on **GLPK** (free, open-source) — no Gurobi/CPLEX dependency
-  anywhere in the solve path. This was a deliberate choice, not a default:
-  proprietary solver licences are tied to a specific registered user with a
-  capped number of concurrent sessions, which is incompatible with a public
-  web app that may have multiple simultaneous users. See "Known limitations"
-  below for what this costs.
+- Runs entirely on **GLPK** (free, open-source) 
 
 ## Getting started
 
-There's no virtual environment included in this repo, deliberately — venvs
-are large, platform-specific, and trivially reproducible from
-`requirements.txt`, so it's standard practice not to commit one. Set one up
-fresh:
+Set up a fresh virtual environment:
 
 ```bash
 # from the repo root (NOTE: must be running python version 3.11)
@@ -46,28 +36,20 @@ Then set up `DATA/` (see below), and confirm everything's working:
 pytest tests/ -v
 ```
 
-You should see `40 passed`. If anything fails, don't proceed to run the
-example scripts until it's sorted — the tests catch the same class of
-problem before you hit it in a real run.
+You should see `40 passed`. If anything fails, don't proceed to run the example scripts until it's sorted.
 
-GLPK itself needs to be installed at the system level for `optlang`'s GLPK
+GLPK itself needs to be installed at the system level for `optlang`'s GLPK 
 interface to work (usually already satisfied on most systems `cobra`/`optlang`
 are tested on, but if `import optlang; optlang.available_solvers` doesn't
 show `'GLPK': True`, install it via your OS package manager first).
 
 **Do not install `gurobipy` or `PySCIPOpt` in the deployment environment.**
-This isn't just "unnecessary" — it's actively unsafe. `optlang` does its own
-solver auto-detection at import time, and if `gurobipy` is merely
-*importable* (regardless of whether it has a valid licence), `optlang` will
-silently prefer it over GLPK. `tools/integrate_omics.py` patches around this
-at import time as a safety net, but the guaranteed-safe approach is simply
-not having those packages installed where this runs publicly.
+
 
 ## Data setup
 
-Data files are **not** included in this repository (large, and DepMap/CCLE
-files carry their own terms of use — see
-[depmap.org](https://depmap.org/portal/download/all/)). Expected layout:
+Data files are **not** included in this repository (large, and DepMap/CCLE files carry their own terms of use — see [depmap.org](https://depmap.org/portal/download/all/)). 
+Expected layout:
 
 ```
 DATA/
@@ -90,8 +72,6 @@ DATA/
 
 ## Usage
 
-The one function the app needs:
-
 ```python
 from tools.pipeline import run_transcriptomics_integration
 
@@ -109,21 +89,17 @@ print(info["predicted_growth"], info["status"])
 fluxes.to_csv("output.csv")
 ```
 
-For a TCGA sample instead of a DepMap cell line, pass `tcga_sample_barcode=`
-instead of `cell_line_name=` (don't pass both — the function will raise if
-you do).
+For a TCGA sample instead of a DepMap cell line, pass `tcga_sample_barcode=` instead of `cell_line_name=` (don't pass both)
 
-`media=None` auto-selects a real, independently-verified medium per model
+`media=None` auto-selects a medium per model
 (see `tools/default_media.py`). Pass `media=False` to force no medium
-constraints, or a dict to supply your own — but `None` is almost always
-what you want.
+constraints, or a dict to supply your own — but `None` is almost always what you want.
 
 See `run_integration.py`, `run_tcga.py`, and `run_gene_essentiality_validation.py`
 for fuller worked scripts (batch runs across multiple cell lines, TCGA
 single-sample runs, gene-essentiality validation). Each has a USER
 INPUT block near the top with hardcoded paths and settings (data
-locations, which cell lines, which model) that you'll need to edit for
-your own setup before running.
+locations, which cell lines, which model) that you may need to edit for your own setup before running.
 
 
 ## Running the tests
@@ -132,14 +108,8 @@ your own setup before running.
 pytest tests/ -v
 ```
 
-40 tests covering gene-ID mapping, medium application, solver selection, and
-the numerical behaviour of each integration method — including regression
-tests for several real bugs found and fixed during development (a sign
-error in a corrected fork of MEWpy's iMAT implementation, a medium-leak bug
-via boundary-reaction misclassification, and a missing module in an
-installed `reframed` release that broke MEWpy's own GIMME implementation on
-a free solver). Run this before and after integrating into the app to
-confirm nothing regressed.
+40 tests covering gene-ID mapping, medium application, solver selection, and the numerical behaviour of each integration method.
+Run this before and after integrating into the app to confirm nothing regressed.
 
 ## Known limitations
 
